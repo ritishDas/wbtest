@@ -2,6 +2,7 @@ require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
 const {fetchUsers, userCheck, generateAccessToken, getUserUnderSupervisor} = require('./database/db');
 const cookieParser = require('cookie-parser');
 
@@ -10,6 +11,11 @@ const app = express();
 app.use(express.static('public'));
 
 app.use(express.json());
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true              
+}));
+
 app.use(cookieParser());
 
 app.get('/api/getusers', async(req, res) => {
