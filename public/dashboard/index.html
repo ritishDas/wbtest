@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Dashboard</title>
+  </head>
+  <body>
+    <h1>Dashboard</h1>
+    <h2 id='user'></h2>
+<div id="fetchedUser">
+  
+</div>
+    <script src="../gardener.js"></script>
+    <script>
+
+    async function user(){
+    const user = await fetch('/api/usercheck', {
+      method: 'GET',
+      credentials: 'include'
+    }).then(res => res.json())
+
+      fetchElement('#user').innerText = `Welcome, ${user.data.userId} `;
+
+
+    const clients = await fetch('/api/supervisor', {
+      method: 'GET',
+      credentials: 'include'
+    }).then(res => res.json())
+
+      console.log(clients);
+
+      if(clients)
+        clients.data.forEach( entry => {
+        appendElement(fetchElement('#fetchedUser'), gardener({
+            t:'div',
+            txt: entry.userId
+        }))
+        })
+
+
+    }
+
+    user()
+    </script>
+    </body>
+  </html>
