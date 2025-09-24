@@ -1,128 +1,73 @@
-const jwt = require('jsonwebtoken');
+const User = require("../models/user");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
-const dummyDatabase = {
-  users: [
-    {
-      userId:'adminritish',
-      password:'pass123',
-      role:'admin'
-    },
-    {
-      userId:'sup1ritish',
-      password:'pass123',
-      role:'supervisor'
-    },
-    {
-      userId:'sup2ritish',
-      password:'pass123',
-      role:'supervisor'
-    },
-    {
-      userId:'client1ritish',
-      password:'pass123',
-      role:'user',
-      supervisor:'sup1ritish'
-    },
-    {
-      userId:'client2ritish',
-      password:'pass123',
-      role:'user',
-      supervisor:'sup1ritish'
+ async function userCheck(userId, password) {
+  const user = await User.findOne({ userId });
 
-    },
-    {
-      userId:'client3ritish',
-      password:'pass123',
-      role:'user',
-      supervisor:'sup2ritish'
+  if (!user) return { status: false };
 
-    },
-    {
-      userId:'client4ritish',
-      password:'pass123',
-      role:'user',
-      supervisor:'sup2ritish'
-    },
-  ],
-};
-/*
-async function fetchUsers() {
-  const users = dummyDatabase.users;
-  return users;
-}
-*/
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) return { status: false };
 
-async function userCheck(userId, password) {
-  const users = dummyDatabase.users;
- const foundUser = users.filter(entry => entry.userId === userId && entry.password === password);
-
-  if(foundUser.length)
-  return {status:true, data:foundUser[0]}
- else 
-  return {status:false}
+  return { status: true, data: user };
 }
 
-async function generateAccessToken(userId, role) {
-  const token = await jwt.sign({userId, role}, process.env.TOKEN_SECRET);
+ async function generateAccessToken(userId, role) {
+  const secret = process.env.TOKEN_SECRET || "dev_secret_key";
+  const token = jwt.sign({ userId, role }, secret, { expiresIn: "1h" });
   return token;
 }
 
-async function getUserUnderSupervisor(supervisorId) {
-  console.log(supervisorId);
-  const users = dummyDatabase.users;
-  const foundUsers = users.filter(entry => entry.supervisor === supervisorId);
-  console.log(foundUsers);
+ async function getUserUnderSupervisor(supervisorId) {
+ const supervisor = await User.findOne({ userId: supervisorId, role: "supervisor" });
+  if (!supervisor) return [];
 
-  const data = foundUsers.map(entry =>{ return {userId:entry.userId,
-    role:entry.role, supervisor:entry.supervisor}})
-  return data;
+  const users = await User.find({ supervisor: supervisor._id }, "userId role");
+  return users;
 }
 
-async function deleteUser(userId) {
- const idx = dummyDatabase.users.findIndex(u => u.userId === userId && u.role === "user");
-
-  const [user] = dummyDatabase.users.splice(idx, 1);
-  
-  return {status:true, message:'done'}
-
+ async function deleteUser(userId) {
+  const result = await User.findOneAndDelete({ userId, role: "user" });
+  if (!result) return { status: false, message: "User not found" };
+  return { status: true, message: "User deleted successfully" };
 }
 
-async function addUser(userId, password, superV) {
+ async function addUser(userId, password, supervisorId) {
+  const existingUser = await User.findOne({ userId });
+  if (existingUser) return { status: false, message: "Duplicate userId" };
 
- const foundUser = dummyDatabase.users.filter(entry => entry.userId === userId )
+  const supervisor = await User.findOne({ userId: supervisorId, role: "supervisor" });
+  if (!supervisor) return { status: false, message: "No supervisor matched" };
 
-  if(foundUser.length)
-  return {status:false, message:'duplicate Id'}
+  const hashedPassword = await bcrypt.hash(password, 10);
 
- const foundsuperV = dummyDatabase.users.filter(entry => entry.userId === superV )
-  if(!foundsuperV.length)
-  return {status:false, message:'No supervisor matched'}
+  const newUser = new User({
+    userId,
+    password: hashedPassword,
+    role: "user",
+    supervisor: supervisor._id
+  });
 
-  dummyDatabase.users.push(
-    {
-      userId:userId,
-      password:password,
-      role:'user',
-      supervisor:superV
-    },
+  await newUser.save();
 
-  )
-  return {status:true, message:'User Added Successfully'}
+  return { status: true, message: "User added successfully" };
 }
 
-async function adminFetch() {
-  const supervisors = dummyDatabase.users.filter(u => u.role === "supervisor");
+ async function adminFetch() {
+  const supervisors = await User.find({ role: "supervisor" });
 
-  return supervisors.map(sup => ({
-    userId: sup.userId,
-    role: sup.role,
-    users: dummyDatabase.users
-      .filter(u => u.role === "user" && u.supervisor === sup.userId)
-      .map(u => ({
-        userId: u.userId,
-      role:u.role
-      }))
-  }));
+  const result = [];
+  for (let sup of supervisors) {
+    const users = await User.find({ role: "user", supervisor: sup._id }, "userId role");
+    result.push({
+      userId: sup.userId,
+      role: sup.role,
+      users: users
+    });
+  }
+
+  return result;
 }
 
 module.exports = {deleteUser, adminFetch, addUser, userCheck, generateAccessToken, getUserUnderSupervisor};
