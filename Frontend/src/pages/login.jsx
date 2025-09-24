@@ -1,11 +1,12 @@
 import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
+import { useAuth } from '../context/auth';
 
 export default function Login() {
   const navigate = useNavigate();
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
-
+  const { isAuthenticated, setIsAuthenticated } = useAuth();
 async function formHandler(e) {
       e.preventDefault();
       const formDataObject = {userId, password};
@@ -22,6 +23,7 @@ async function formHandler(e) {
 
       if(result.success){
       navigate('/dashboard');
+      setIsAuthenticated(true);
       } else {
         alert('Login failed: ' + result.message);
       }

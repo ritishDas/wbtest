@@ -20,44 +20,45 @@ const dummyDatabase = {
     {
       userId:'client1ritish',
       password:'pass123',
-      role:'client',
+      role:'user',
       supervisor:'sup1ritish'
     },
     {
       userId:'client2ritish',
       password:'pass123',
-      role:'client',
+      role:'user',
       supervisor:'sup1ritish'
 
     },
     {
       userId:'client3ritish',
       password:'pass123',
-      role:'client',
+      role:'user',
       supervisor:'sup2ritish'
 
     },
     {
       userId:'client4ritish',
       password:'pass123',
-      role:'client',
+      role:'user',
       supervisor:'sup2ritish'
 
     },
   ]
 };
-
+/*
 async function fetchUsers() {
   const users = dummyDatabase.users;
   return users;
 }
+*/
 
 async function userCheck(userId, password) {
   const users = dummyDatabase.users;
  const foundUser = users.filter(entry => entry.userId === userId && entry.password === password);
 
   if(foundUser.length)
-  return {status:true}
+  return {status:true, data:foundUser[0]}
  else 
   return {status:false}
 }
@@ -79,4 +80,4 @@ async function getUserUnderSupervisor(supervisorId) {
 }
 
 
-module.exports = {fetchUsers, userCheck, generateAccessToken, getUserUnderSupervisor};
+module.exports = {userCheck, generateAccessToken, getUserUnderSupervisor};
