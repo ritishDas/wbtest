@@ -3,6 +3,7 @@ import { useAuth } from "../context/auth";
 import { useState } from "react";
 import Supervisor from "../components/supervisor";
 import Admin from "../components/admin";
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 export default function Dashboard() {
 
@@ -10,8 +11,7 @@ export default function Dashboard() {
 
 useEffect(() => {
 (async()=>{
-//      fetch('http://localhost:5000/');
-      const result = await fetch('http://localhost:5000/api/usercheck', {
+      const result = await fetch(`${backendUrl}/api/usercheck`, {
         credentials:'include',
       }).then(res => res.json())
       console.log(result);

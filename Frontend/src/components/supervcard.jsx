@@ -1,10 +1,11 @@
 import Usercard from "./user"
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 export default function Supervcard(props) {
 
  async function handleDelete(userId) {
     const formDataObject = {userId};
-      const result = await fetch(`http://localhost:5000/api/admin/delete`, {
+      const result = await fetch(`${backendUrl}/api/admin/delete`, {
         method: 'put',
         body: JSON.stringify(formDataObject),
         headers: {
@@ -14,6 +15,7 @@ export default function Supervcard(props) {
       }).then(res => res.json())
 
     alert(result.message);
+    await props.fun();
   }
 
 return (

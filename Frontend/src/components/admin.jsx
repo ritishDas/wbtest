@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useEffect } from "react"
 import Supervcard from "./supervcard";
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 
 export default function Admin() {
@@ -9,10 +10,19 @@ export default function Admin() {
   const [newuserpass, setnewUserpass] = useState('');
   const [newusersupv, setnewusersupv] = useState('');
 
+    async function datafetch(){
+
+      const result = await fetch(`${backendUrl}/api/adminfetch`, {
+        credentials:'include',
+      }).then(res => res.json())
+      console.log(result.data);
+      setSupervisors(result.data);
+    }
+
   async function handleSubmit(e) {
     e.preventDefault();
     const formDataObject = {userId:newuserid,password:newuserpass, supervisor:newusersupv};
-      const result = await fetch(`http://localhost:5000/api/admin/adduser`, {
+      const result = await fetch(`${backendUrl}/api/admin/adduser`, {
         method: 'post',
         body: JSON.stringify(formDataObject),
         headers: {
@@ -22,16 +32,15 @@ export default function Admin() {
       }).then(res => res.json())
 
     alert(result.message);
+    setnewUserId('');
+    setnewUserpass('');
+    setnewusersupv('');
+    await datafetch();
   }
 
+
   useEffect(()=>{
-    (async() => {
-      const result = await fetch(`http://localhost:5000/api/adminfetch`, {
-        credentials:'include',
-      }).then(res => res.json())
-      console.log(result.data);
-      setSupervisors(result.data);
-    })()
+    datafetch()
   },[]);
 
   return <div>
@@ -40,7 +49,7 @@ export default function Admin() {
       <div>
 <h2 class="m-5 text-lg font-bold">Supervisors</h2>
 
-    {supervisors.map(entry => <Supervcard key={entry.userId} userId={entry.userId} users={entry.users}/>) }
+    {supervisors.map(entry => <Supervcard key={entry.userId} fun={datafetch} userId={entry.userId} users={entry.users}/>) }
         
       </div>
 <form onSubmit={handleSubmit} className="max-w-sm mx-auto p-4 bg-white rounded-xl shadow-md space-y-3">

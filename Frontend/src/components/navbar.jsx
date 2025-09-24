@@ -1,13 +1,13 @@
 import { useEffect } from 'react';
 import {Link} from 'react-router-dom';
 import { useAuth } from '../context/auth';
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 
 export default function Navbar() {
   useEffect(() => {
 (async()=>{
-//      fetch('http://localhost:5000/');
-      const result = await fetch('http://localhost:5000/api/usercheck', {
+      const result = await fetch(`${backendUrl}/api/usercheck`, {
         credentials:'include',
       }).then(res => res.json())
       console.log(result.success);
@@ -19,7 +19,7 @@ export default function Navbar() {
   const { isAuthenticated, setIsAuthenticated } = useAuth();
 
   async function handleLogout() {
-      const result = await fetch('http://localhost:5000/api/logout', {
+      const result = await fetch(`${backendUrl}/api/logout`, {
         credentials:'include',
       method:'POST',
       }).then(res => res.json())

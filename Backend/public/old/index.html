@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Login</title>
+  </head>
+  <body>
+    <h1>Login</h1>
+    <form id="form">
+      <label for="userid">UserId</label>
+      <input type="input" name="userId" id="userid">
+      <label for="password">Password</label>
+      <input type="password" name="password" id="password">
+      <input type="submit" value="Submit">
+    </form>
+
+    <h2>Available Users</h2>
+    <div id = 'users'>
+    </div>
+
+    <script src="gardener.js"></script>
+    <script>
+
+    fetchElement('#form').addEventListener('submit', async(e) => {
+      e.preventDefault();
+      const data = new FormData(e.target);
+      const formDataObject = Object.fromEntries(data.entries());
+      const result = await fetch('/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials:'include',
+        body: JSON.stringify(formDataObject)
+      }).then(res => res.json())
+
+      console.log(result);
+
+      if(result.success){
+        alert('Login successful!');
+        window.location.href = '/dashboard';
+      } else {
+        alert('Login failed: ' + result.message);
+      }
+    })
+
+const parent = fetchElement('#users');
+const adminDiv = gardener({t:'div', children:[{t:'h3', txt:'Admins' }]});
+const supervisorDiv = gardener({t:'div', children:[{t:'h3', txt:'Supervisors' }]});
+const clientDiv = gardener({t:'div', children:[{t:'h3', txt:'Clients' }]});
+
+   async function fetchUsers(){
+  const users = await fetch('/api/getUsers').then(res => res.json());
+  console.log(users.data);
+
+  users.data.forEach( (entry) => {
+    if(entry.role === 'admin')
+      appendElement(adminDiv, gardener({
+        t:'div', 
+        children:[ 
+          { 
+            t:'span',
+            txt:`UserId: ${entry.userId}`
+          },
+          { 
+            t:'span',
+            txt:`Password: ${entry.password}`        
+          }
+        ]
+      }));
+
+    if(entry.role === 'supervisor')
+      appendElement(supervisorDiv, gardener({
+        t:'div', 
+        children:[ 
+          { 
+            t:'span',
+            txt:`UserId: ${entry.userId}`
+          },
+          { 
+            t:'span',
+            txt:`Password: ${entry.password}`        
+          }
+          ]
+      }));
+    if(entry.role === 'client')
+      appendElement(clientDiv, gardener({
+        t:'div', 
+        children:[ 
+          { 
+            t:'span',
+            txt:`UserId: ${entry.userId}`
+          },
+          { 
+            t:'span',
+            txt:`Password: ${entry.password}`        
+          }
+        ]
+      }));
+  });
+
+  appendElement(parent, adminDiv);
+  appendElement(parent, supervisorDiv);
+  appendElement(parent, clientDiv);
+    }
+
+   fetchUsers()
+
+
+    </script>
+  </body>
+</html>
+

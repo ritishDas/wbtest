@@ -1,6 +1,7 @@
 import { useEffect } from "react"
 import Usercard from "./user"
 import { useState } from "react";
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 export default function Supervisor(props){
 const [users, setUsers] = useState([]);
@@ -9,21 +10,23 @@ const [users, setUsers] = useState([]);
   const [newuserpass, setnewUserpass] = useState('');
   console.log('from supervisor component', props);
 
-useEffect(() => {
-(async()=>{
-      console.log(`http://localhost:5000/api/supervisor/${props.userId}`);
-      const result = await fetch(`http://localhost:5000/api/supervisor/${props.userId}`, {
+async function datafetch(){
+      const result = await fetch(`${backendUrl}/api/supervisor/${props.userId}`, {
         credentials:'include',
       }).then(res => res.json())
+      console.log(result);
 
       setUsers(result.data);
-    })()
-  },[props.userId, handleSubmit]);
+    }
+
+useEffect(() => {
+    datafetch()
+  },[props.userId]);
 
 async function handleSubmit(e) {
     e.preventDefault();
     const formDataObject = {userId:newuserid,password:newuserpass};
-      const result = await fetch(`http://localhost:5000/api/adduser`, {
+      const result = await fetch(`${backendUrl}/api/adduser`, {
         method: 'post',
         body: JSON.stringify(formDataObject),
         headers: {
@@ -33,6 +36,7 @@ async function handleSubmit(e) {
       }).then(res => res.json())
 
     alert(result.message);
+    await datafetch();
   }
 
 return (

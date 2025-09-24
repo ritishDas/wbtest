@@ -15,7 +15,7 @@ app.use(cors({
   credentials: true              
 }));
 
-//Old Frontend  app.use(express.static('public'));
+app.use(express.static('public'));
 
 app.use(express.json());
 app.use(cookieParser());
