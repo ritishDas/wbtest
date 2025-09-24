@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useAuth } from "../context/auth";
 import { useState } from "react";
 import Supervisor from "../components/supervisor";
+import Admin from "../components/admin";
 
 export default function Dashboard() {
 
@@ -27,7 +28,7 @@ useEffect(() => {
     {!isAuthenticated?<span className="text-center m-auto p-4 rounded-sm w-100 bg-yellow-100 block text-yellow-700">Please Login First</span>:
       <div>
         <h2 className="m-4 text-lg"><span className="font-bold">Welcome </span>{user.userId}</h2>
-       {(user.role==='admin'?<>Admin</>:<Supervisor userId={user.userId}/>)}
+       {(user.role==='admin'?<Admin/>:(user.role==='supervisor'&&<Supervisor userId={user.userId}/>))}
       </div>
       }
 

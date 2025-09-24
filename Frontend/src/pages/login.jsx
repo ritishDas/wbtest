@@ -11,9 +11,9 @@ async function formHandler(e) {
       e.preventDefault();
       const formDataObject = {userId, password};
       const result = await fetch('http://localhost:5000/api/login', {
-        method: 'POST',
+        method: 'post',
         headers: {
-          'Content-Type': 'application/json'
+          'content-type': 'application/json'
         },
         credentials:'include',
         body: JSON.stringify(formDataObject)

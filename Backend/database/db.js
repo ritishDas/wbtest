@@ -79,5 +79,38 @@ async function getUserUnderSupervisor(supervisorId) {
   return data;
 }
 
+async function addUserbySuperv(userId, password, superV) {
 
-module.exports = {userCheck, generateAccessToken, getUserUnderSupervisor};
+ const foundUser = dummyDatabase.users.filter(entry => entry.userId === userId )
+
+  if(foundUser.length)
+  return {status:false, message:'duplicate Id'}
+
+  dummyDatabase.users.push(
+    {
+      userId:userId,
+      password:password,
+      role:'user',
+      supervisor:superV
+    },
+
+  )
+  return {status:true}
+}
+
+async function adminFetch() {
+  const supervisors = dummyDatabase.users.filter(u => u.role === "supervisor");
+
+  return supervisors.map(sup => ({
+    userId: sup.userId,
+    role: sup.role,
+    users: dummyDatabase.users
+      .filter(u => u.role === "user" && u.supervisor === sup.userId)
+      .map(u => ({
+        userId: u.userId,
+      role:u.role
+      }))
+  }));
+}
+
+module.exports = {adminFetch, addUserbySuperv, userCheck, generateAccessToken, getUserUnderSupervisor};

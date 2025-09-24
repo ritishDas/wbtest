@@ -1,6 +1,7 @@
-const {userCheck, generateAccessToken} = require('../database/db');
+const {userCheck, generateAccessToken, addUserbySuperv, adminFetch} = require('../database/db');
 const {checkAuth} = require('../middlewares/auth');
-const {Router} = require( 'express')
+const {Router} = require( 'express');
+const { supervisorCheck, adminCheck } = require('../middlewares/autho');
 
 const router = Router();
 
@@ -32,9 +33,26 @@ router.post('/logout', (req, res) => {
   res.json({ success: true, message: "Logged out successfully" });
 });
 
+router.post('/adduser', checkAuth, supervisorCheck, async (req, res) => {
+  const {userId, password} = req.body;
+const result = await addUserbySuperv(userId, password, req.user.userId);
+
+  if(result.status)
+    res.json({success:true, message:'User Added'})
+  else
+    res.json({success:false, message:'duplicate id found'})
+
+
+});
+
 router.get('/usercheck', checkAuth, (req, res) => {
   console.log('from usercheck ', req.user.role);
   res.json({success:true, data:{userId:req.user.userId, role:req.user.role}});
 });
+
+router.get('/adminfetch', checkAuth, adminCheck ,async (req, res) => {
+const data = await adminFetch();
+  res.json({success:true, data});
+})
 
 module.exports = router;
