@@ -42,9 +42,8 @@ const dummyDatabase = {
       password:'pass123',
       role:'user',
       supervisor:'sup2ritish'
-
     },
-  ]
+  ],
 };
 /*
 async function fetchUsers() {
@@ -79,12 +78,25 @@ async function getUserUnderSupervisor(supervisorId) {
   return data;
 }
 
-async function addUserbySuperv(userId, password, superV) {
+async function deleteUser(userId) {
+ const idx = dummyDatabase.users.findIndex(u => u.userId === userId && u.role === "user");
+
+  const [user] = dummyDatabase.users.splice(idx, 1);
+  
+  return {status:true, message:'done'}
+
+}
+
+async function addUser(userId, password, superV) {
 
  const foundUser = dummyDatabase.users.filter(entry => entry.userId === userId )
 
   if(foundUser.length)
   return {status:false, message:'duplicate Id'}
+
+ const foundsuperV = dummyDatabase.users.filter(entry => entry.userId === superV )
+  if(!foundsuperV.length)
+  return {status:false, message:'No supervisor matched'}
 
   dummyDatabase.users.push(
     {
@@ -95,7 +107,7 @@ async function addUserbySuperv(userId, password, superV) {
     },
 
   )
-  return {status:true}
+  return {status:true, message:'User Added Successfully'}
 }
 
 async function adminFetch() {
@@ -113,4 +125,4 @@ async function adminFetch() {
   }));
 }
 
-module.exports = {adminFetch, addUserbySuperv, userCheck, generateAccessToken, getUserUnderSupervisor};
+module.exports = {deleteUser, adminFetch, addUser, userCheck, generateAccessToken, getUserUnderSupervisor};

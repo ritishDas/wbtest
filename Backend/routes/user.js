@@ -1,4 +1,4 @@
-const {userCheck, generateAccessToken, addUserbySuperv, adminFetch} = require('../database/db');
+const {userCheck, generateAccessToken, addUser, adminFetch, deleteUser} = require('../database/db');
 const {checkAuth} = require('../middlewares/auth');
 const {Router} = require( 'express');
 const { supervisorCheck, adminCheck } = require('../middlewares/autho');
@@ -35,7 +35,7 @@ router.post('/logout', (req, res) => {
 
 router.post('/adduser', checkAuth, supervisorCheck, async (req, res) => {
   const {userId, password} = req.body;
-const result = await addUserbySuperv(userId, password, req.user.userId);
+const result = await addUser(userId, password, req.user.userId);
 
   if(result.status)
     res.json({success:true, message:'User Added'})
@@ -54,5 +54,21 @@ router.get('/adminfetch', checkAuth, adminCheck ,async (req, res) => {
 const data = await adminFetch();
   res.json({success:true, data});
 })
+
+router.post('/admin/adduser', checkAuth, adminCheck ,async (req, res) => {
+const {userId, password, supervisor} = req.body;
+const result = await addUser(userId, password, supervisor);
+
+    res.json(result)
+
+});
+
+router.put('/admin/delete', checkAuth, adminCheck ,async (req, res) => {
+const {userId} = req.body;
+const result = await deleteUser(userId);
+
+    res.json(result)
+
+});
 
 module.exports = router;

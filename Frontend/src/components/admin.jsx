@@ -9,6 +9,21 @@ export default function Admin() {
   const [newuserpass, setnewUserpass] = useState('');
   const [newusersupv, setnewusersupv] = useState('');
 
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const formDataObject = {userId:newuserid,password:newuserpass, supervisor:newusersupv};
+      const result = await fetch(`http://localhost:5000/api/admin/adduser`, {
+        method: 'post',
+        body: JSON.stringify(formDataObject),
+        headers: {
+          'content-type': 'application/json'
+        }, 
+        credentials:'include',
+      }).then(res => res.json())
+
+    alert(result.message);
+  }
+
   useEffect(()=>{
     (async() => {
       const result = await fetch(`http://localhost:5000/api/adminfetch`, {
@@ -18,22 +33,63 @@ export default function Admin() {
       setSupervisors(result.data);
     })()
   },[]);
+
   return <div>
-    <h1>Admin</h1>
-<h2>Supervisors</h2>
+    <h2 class="m-10 text-xl font-bold">Admin Dashboard</h2>
+    <div class="flex justify-center space-x-10 items-center">
+      <div>
+<h2 class="m-5 text-lg font-bold">Supervisors</h2>
 
     {supervisors.map(entry => <Supervcard key={entry.userId} userId={entry.userId} users={entry.users}/>) }
-    <form>
-      <h2>Add New User</h2>
-      <label htmlFor="userid">UserId</label>
-      <input id="userid" onChange={(e)=>setnewUserId(e.target.value)} type="text" name="userId" value={newuserid}/>
-      <label htmlFor="password">Password</label>
-      <input id="password" onChange={(e)=>setnewUserpass(e.target.value)} type="text" name="password" value={newuserpass}/>
+        
+      </div>
+<form onSubmit={handleSubmit} className="max-w-sm mx-auto p-4 bg-white rounded-xl shadow-md space-y-3">
+  <h2 className="text-lg font-semibold text-gray-700 text-center">Add New User</h2>
 
-      <label htmlFor="supervisor">Supervisor</label>
-      <input id="supervisor" onChange={(e)=>setnewusersupv(e.target.value)} type="text" name="supervisor" value={newusersupv}/>
+  <div className="flex flex-col">
+    <label htmlFor="userid" className="text-sm font-medium text-gray-600">UserId</label>
+    <input
+      id="userid"
+      type="text"
+      name="userId"
+      value={newuserid}
+      onChange={(e) => setnewUserId(e.target.value)}
+      className="mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+  </div>
 
-      <input type="submit" name="userId" value="Submit"/>
-    </form>
+  <div className="flex flex-col">
+    <label htmlFor="password" className="text-sm font-medium text-gray-600">Password</label>
+    <input
+      id="password"
+      type="text"
+      name="password"
+      value={newuserpass}
+      onChange={(e) => setnewUserpass(e.target.value)}
+      className="mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+  </div>
+
+  <div className="flex flex-col">
+    <label htmlFor="supervisor" className="text-sm font-medium text-gray-600">Supervisor</label>
+    <input
+      id="supervisor"
+      type="text"
+      name="supervisor"
+      value={newusersupv}
+      onChange={(e) => setnewusersupv(e.target.value)}
+      className="mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+  </div>
+
+  <button
+    type="submit"
+    className="w-full bg-green-500 text-white py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition"
+  >
+    Submit
+  </button>
+</form>
+      
+    </div>
   </div>
 }
